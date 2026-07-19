@@ -12,7 +12,10 @@ npm run start:dev
 ```
 
 - REST: `GET http://localhost:3000/users/1`
-- GraphQL endpoint와 Playground: `http://localhost:3000/graphql`
+- GraphQL endpoint와 Apollo Sandbox: `http://localhost:3000/graphql`
+
+Apollo Sandbox의 Explorer에서 Query와 필드를 선택하면 Operation Editor에 요청이 자동으로 만들어집니다.
+`introspection: true`로 Sandbox가 서버 Schema를 조회해 문서와 자동완성을 구성하고, `embed: true`로 Sandbox를 Landing Page 안에 표시합니다.
 
 ```graphql
 query {
