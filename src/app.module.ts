@@ -11,7 +11,7 @@ import { UsersModule } from './users/users.module';
       typePaths: ['./**/*.graphql'],
       playground: false,
       introspection: true,
-      plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     UsersModule,
   ],

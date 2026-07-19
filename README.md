@@ -12,10 +12,13 @@ npm run start:dev
 ```
 
 - REST: `GET http://localhost:3000/users/1`
+- Swagger UI: `http://localhost:3000/swagger`
 - GraphQL endpoint와 Apollo Sandbox: `http://localhost:3000/graphql`
+- GraphQL Voyager: `http://localhost:3000/graphql-voyager`
 
 Apollo Sandbox의 Explorer에서 Query와 필드를 선택하면 Operation Editor에 요청이 자동으로 만들어집니다.
-`introspection: true`로 Sandbox가 서버 Schema를 조회해 문서와 자동완성을 구성하고, `embed: true`로 Sandbox를 Landing Page 안에 표시합니다.
+`introspection: true`로 Sandbox가 서버 Schema를 조회해 문서와 자동완성을 구성합니다.
+GraphQL Voyager에서는 같은 Schema를 타입 간 관계 그래프로 확인할 수 있습니다.
 
 ```graphql
 query {
