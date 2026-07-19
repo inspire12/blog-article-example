@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       typePaths: ['./**/*.graphql'],
+      playground: true,
     }),
     UsersModule,
   ],

@@ -12,7 +12,7 @@ npm run start:dev
 ```
 
 - REST: `GET http://localhost:3000/users/1`
-- GraphQL endpoint와 Apollo Explorer: `http://localhost:3000/graphql`
+- GraphQL endpoint와 Playground: `http://localhost:3000/graphql`
 
 ```graphql
 query {
