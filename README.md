@@ -1,85 +1,35 @@
-# NestJS REST Controller vs GraphQL Resolver
+# Blog Examples
 
-NestJS에서 REST Controller와 GraphQL Resolver가 요청을 받는 기준을 비교하는 예제입니다. 두 API는 같은 `UserService`를 호출하므로 진입점의 차이에 집중할 수 있습니다.
+블로그 글에 사용하는 실행 가능한 예제와 기획 문서를 모으는 저장소입니다. 각 예제는 독립된 폴더에서 의존성을 설치하고 실행합니다.
 
-## 실행
+## 구성
 
-Node.js 20.11 이상을 권장합니다.
+```text
+examples/
+  rest-graphql-nestjs/  # NestJS REST Controller와 GraphQL Resolver 비교
+docs/
+  ai-backend/          # AI 백엔드 학습 기획과 OWASP 블로그 초안
+START-HERE.md          # 다른 컴퓨터에서 이어서 작업할 시작 프롬프트
+```
+
+| 주제 | 문서 | 상태 |
+| --- | --- | --- |
+| NestJS REST vs GraphQL | [예제 실행 안내](examples/rest-graphql-nestjs/README.md) | 구현 완료 |
+| AI 백엔드 학습·주문/환불 도우미 | [기획안](docs/ai-backend/README.md) · [로드맵](docs/ai-backend/ROADMAP.md) | 기획 단계 |
+| OWASP LLM Top 10 2025 | [블로그 초안](docs/ai-backend/BLOG-owasp-llm-top10-2025.md) | 초안 작성 |
+
+## GraphQL 예제 실행
 
 ```bash
-npm install
+cd examples/rest-graphql-nestjs
+npm ci
 npm run start:dev
 ```
 
-- REST: `GET http://localhost:3000/users/1`
-- Swagger UI: `http://localhost:3000/swagger`
-- GraphQL endpoint와 Apollo Sandbox: `http://localhost:3000/graphql`
-- GraphQL Voyager: `http://localhost:3000/graphql-voyager`
+빌드는 같은 폴더에서 `npm run build`로 실행합니다. 기존 루트의 소스와 npm 설정은 모두 예제 폴더로 이동했습니다.
 
-Apollo Sandbox의 Explorer에서 Query와 필드를 선택하면 Operation Editor에 요청이 자동으로 만들어집니다.
-`introspection: true`로 Sandbox가 서버 Schema를 조회해 문서와 자동완성을 구성합니다.
-GraphQL Voyager에서는 같은 Schema를 타입 간 관계 그래프로 확인할 수 있습니다.
+## 새 예제 추가
 
-```graphql
-query {
-  user(id: 1) {
-    id
-    name
-  }
-}
-```
+`examples/<주제>/`에 소스, 의존성 설정, 실행·검증 방법을 담은 README를 함께 둡니다. 글과 기획 자료는 해당 예제 또는 `docs/<주제>/`에 정리하고 위 목록에 링크를 추가합니다.
 
-## 요청이 연결되는 기준
-
-REST는 HTTP Method와 URL을 기준으로 Controller 메서드를 선택합니다.
-
-```text
-GET /users/1
-    ↓
-UserController.getUser(1)
-    ↓
-UserService.getUser(1)
-```
-
-GraphQL은 요청한 필드를 Schema에서 찾고, 그 필드에 연결된 Resolver를 실행합니다.
-
-```text
-Query.user
-    ↓
-UserResolver.user(1)
-    ↓
-UserService.getUser(1)
-```
-
-Schema는 [`src/users/user.graphql`](src/users/user.graphql)에 정의되어 있습니다.
-
-```graphql
-type Query {
-  user(id: Int!): User!
-}
-
-type User {
-  id: Int!
-  name: String!
-}
-```
-
-`age`처럼 Schema에 없는 필드나 `"1"`처럼 잘못된 타입의 인자를 보내면 GraphQL 검증 단계에서 요청이 거절되며 Resolver는 실행되지 않습니다.
-
-```bash
-npm run build
-```
-
-## REST와 GraphQL 비교
-
-| 역할 | REST | GraphQL |
-| --- | --- | --- |
-| 요청 진입점 | Controller | Resolver |
-| 작업 식별 | HTTP Method + URL | Query/Mutation 필드 |
-| 입력값 | Path, Query String, Body | Arguments, Input |
-| 비즈니스 로직 | Service 호출 | Service 호출 |
-| 일반적인 응답 형식 | JSON | JSON |
-| 데이터 조회 | Repository 또는 ORM | Repository 또는 ORM |
-| 계약 확인 | Request/Response DTO + Swagger | Schema + Explorer/GraphiQL |
-
-> GraphQL 요청도 일반적으로 하나의 HTTP endpoint를 통해 들어옵니다. Resolver가 HTTP 요청 자체를 직접 처리한다기보다, GraphQL 실행 엔진이 요청을 파싱·검증한 뒤 Schema 필드에 연결된 Resolver를 호출한다고 표현하는 편이 더 정확합니다.
+다른 컴퓨터에서 이어서 작업할 때는 [START-HERE.md](START-HERE.md)의 프롬프트를 사용하세요.
