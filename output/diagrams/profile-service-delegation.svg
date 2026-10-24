@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#64748b" stroke-width="1.7"/></marker></defs>
+<rect width="1200" height="480" rx="24" fill="#f8fafc"/>
+<g font-family="Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif">
+<text x="80" y="65" font-size="24" font-weight="700" fill="#334155">여러 관계에서 같은 프로필 조회 기능을 사용합니다</text>
+<rect x="80" y="116" width="390" height="100" rx="16" fill="#fff" stroke="#e535ab" stroke-width="2"/>
+<text x="275" y="174" text-anchor="middle" font-size="26" font-weight="600" fill="#83185d">Post.author Resolver</text>
+<rect x="80" y="284" width="390" height="100" rx="16" fill="#fff" stroke="#e535ab" stroke-width="2"/>
+<text x="275" y="342" text-anchor="middle" font-size="26" font-weight="600" fill="#83185d">Comment.author Resolver</text>
+<path d="M470 166 H580 Q600 166 600 186 V230 Q600 250 620 250 H716" fill="none" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+<path d="M470 334 H580 Q600 334 600 314 V270 Q600 250 620 250" fill="none" stroke="#64748b" stroke-width="3"/>
+<rect x="740" y="170" width="380" height="160" rx="18" fill="#edf7f7" stroke="#15958f" stroke-width="2"/>
+<text x="930" y="224" text-anchor="middle" font-size="29" font-weight="700" fill="#11645f">ProfileService</text>
+<text x="930" y="268" text-anchor="middle" font-size="21" fill="#365d5a">프로필 조회와 공개 규칙</text>
+<text x="930" y="301" text-anchor="middle" font-size="19" fill="#577471">회원 관리</text>
+<text x="600" y="440" text-anchor="middle" font-size="21" fill="#64748b">조회 경로가 달라도 프로필 공개 여부는 한곳에서 판단합니다.</text>
+</g></svg>

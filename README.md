@@ -9,6 +9,8 @@ examples/
   rest-graphql-nestjs/  # NestJS REST Controller와 GraphQL Resolver 비교
 docs/
   ai-backend/          # AI 백엔드 학습 기획과 OWASP 블로그 초안
+output/
+  diagrams/            # 블로그 다이어그램 SVG 원본과 PNG 이미지
 START-HERE.md          # 다른 컴퓨터에서 이어서 작업할 시작 프롬프트
 ```
 
@@ -33,3 +35,15 @@ npm run start:dev
 `examples/<주제>/`에 소스, 의존성 설정, 실행·검증 방법을 담은 README를 함께 둡니다. 글과 기획 자료는 해당 예제 또는 `docs/<주제>/`에 정리하고 위 목록에 링크를 추가합니다.
 
 다른 컴퓨터에서 이어서 작업할 때는 [START-HERE.md](START-HERE.md)의 프롬프트를 사용하세요.
+
+## 지식 관리
+
+학습 내용, 설계 결정, 블로그 초안과 참고 출처는 `docs/<주제>/`에 Markdown으로 기록하고 GitHub에서 변경 이력을 관리합니다. 확인된 사실과 아이디어·미검증 가정을 구분하고, 자료를 참고했다면 출처 링크와 확인 날짜를 함께 남깁니다. 새 문서는 위 주제 목록에 연결합니다.
+
+다이어그램은 `output/diagrams/`에서 편집 가능한 SVG 원본과 게시용 PNG 이미지를 함께 관리합니다.
+
+- [GraphQL 도메인 구성](output/diagrams/graphql-domain-composition.svg) · [PNG](output/diagrams/graphql-domain-composition.png)
+- [GraphQL 요청 필드](output/diagrams/graphql-requested-fields.svg) · [PNG](output/diagrams/graphql-requested-fields.png)
+- [프로필 서비스 위임](output/diagrams/profile-service-delegation.svg) · [PNG](output/diagrams/profile-service-delegation.png)
+
+비밀 키나 개인정보는 기록하지 않습니다. 작업 후 문서와 관련 자료를 함께 커밋·푸시하여 다른 컴퓨터에서도 저장소를 기준으로 이어서 작업합니다.
