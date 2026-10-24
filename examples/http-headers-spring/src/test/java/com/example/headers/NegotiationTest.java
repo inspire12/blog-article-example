@@ -41,4 +41,21 @@ class NegotiationTest {
                 .accept("application/json").content("not-json"))
             .andExpect(status().isBadRequest());
     }
+    @Test void jsonInputSvgOutput() throws Exception {
+        mvc.perform(post("/articles/preview").contentType("application/json")
+                .accept("image/svg+xml").content(BODY))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith("image/svg+xml"))
+            .andExpect(xpath("/*[local-name()='svg']").exists())
+            .andExpect(xpath("//*[local-name()='text'][2]").string("HTTP 헤더"));
+    }
+    @Test void svgTitleIsTextNotMarkup() throws Exception {
+        mvc.perform(post("/articles/preview").contentType("application/json")
+                .accept("image/svg+xml")
+                .content("{\"title\":\"<script>alert(1)</script> & 제목\"}"))
+            .andExpect(status().isOk())
+            .andExpect(xpath("//*[local-name()='script']").doesNotExist())
+            .andExpect(xpath("//*[local-name()='text'][2]")
+                    .string("<script>alert(1)</script> & 제목"));
+    }
 }

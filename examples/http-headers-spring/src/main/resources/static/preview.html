@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accept에 따른 응답 미리보기</title>
+<style>body{font:16px/1.7 system-ui;max-width:850px;margin:40px auto;padding:0 20px;color:#183b66}input,select,button{font:inherit;padding:8px;max-width:100%;box-sizing:border-box}img{max-width:100%;height:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>같은 JSON 요청, 다른 응답 표현</h1>
+<form id="form">
+<label>제목 <input id="title" value="HTTP 헤더" maxlength="80"></label>
+<label>Accept <select id="accept"><option>image/svg+xml</option><option>application/json</option><option>text/plain</option></select></label>
+<button>미리보기</button>
+</form>
+<p id="status" role="status"></p>
+<img id="image" alt="입력한 글 제목의 이미지 미리보기" hidden>
+<pre id="text"></pre>
+<script>
+let imageUrl;
+document.getElementById('form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const picture = document.getElementById('image');
+  const text = document.getElementById('text');
+  const status = document.getElementById('status');
+  picture.hidden = true; picture.removeAttribute('src'); text.textContent = '';
+  if (imageUrl) { URL.revokeObjectURL(imageUrl); imageUrl = undefined; }
+  try {
+    const response = await fetch('/articles/preview', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Accept': document.getElementById('accept').value},
+      body: JSON.stringify({title: document.getElementById('title').value})
+    });
+    const type = response.headers.get('Content-Type') || '';
+    status.textContent = `${response.status} · Content-Type: ${type}`;
+    if (response.ok && type.startsWith('image/svg+xml')) {
+      imageUrl = URL.createObjectURL(await response.blob());
+      picture.src = imageUrl; picture.hidden = false;
+    } else { text.textContent = await response.text(); }
+  } catch (error) { status.textContent = `요청 실패: ${error.message}`; }
+});
+</script>
+</html>

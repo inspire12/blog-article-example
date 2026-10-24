@@ -80,6 +80,8 @@ Spring에서는 `consumes`로 받을 요청 형식을, `produces`로 제공할 �
 
 다만 헤더를 바꾼다고 본문까지 자동으로 바뀌는 것은 아닙니다. `Content-Type: application/json`이라고 선언했다면 본문도 실제 JSON이어야 하고, 서버가 JSON 응답을 제공하려면 그 응답을 만드는 처리도 있어야 합니다. Spring에서는 메시지 컨버터가 본문을 읽고 쓰는 변환을 담당합니다.
 
+같은 요청에서 `Accept: image/svg+xml`을 보내면 글 제목을 이미지로 받을 수도 있습니다. 예제에 SVG 응답을 추가했습니다. JSON 요청이 텍스트 응답뿐 아니라 이미지 응답으로도 이어질 수 있는 셈입니다. 서버 실행 후 `/preview.html`에서 세 표현을 비교할 수 있습니다.
+
 전체 Controller와 실행 명령은 [GitHub 예제](https://github.com/inspire12/blog-article-example/tree/main/examples/http-headers-spring)에 정리했습니다. JSON·텍스트 응답뿐 아니라 요청 형식이 맞지 않는 경우, 지원하지 않는 응답 형식을 요구하는 경우도 테스트에서 확인할 수 있습니다.
 
 요청 본문을 읽지 못한다면 먼저 Content-Type과 실제 본문을, 원하는 응답을 받지 못한다면 Accept와 서버가 지원하는 형식을 함께 확인하면 됩니다.

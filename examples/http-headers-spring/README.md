@@ -65,3 +65,22 @@ curl --compressed http://localhost:8080/compression/article
 원시 gzip 바이트를 파일로 저장·복원하는 명령은 [압축 본문](../../docs/http-headers/SECTION-02-compression.md)에 있다. `--compressed`는 자동 복원하므로 압축 크기 측정에는 사용하지 않는다.
 
 2026-10-24: 전체 테스트 6개 성공. 기존 MockMvc 5개에 더해 `CompressionTest`가 RANDOM_PORT로 내장 Tomcat을 기동하고 Java HttpClient로 실제 소켓 요청을 보냈다. identity 응답은 Content-Encoding 없음, gzip 응답은 Content-Encoding: gzip 및 Vary: Accept-Encoding 확인. gzip 복원 결과와 원문 바이트 일치. 반복 문장 200회의 원문은 13,800바이트, gzip 본문은 167바이트였다. 실제 서비스 압축률이나 응답 시간 개선을 대표하는 측정이 아니다. curl 명령 자체의 실행은 미검증이다.
+
+## 이미지 표현도 선택하기
+
+같은 `POST /articles/preview`에 `Accept: image/svg+xml`을 보내면 제목을 담은 SVG 이미지 바이트를 반환한다. 요청 Content-Type은 여전히 application/json이다. SVG는 텍스트로 작성 가능한 이미지 형식이므로 별도 이미지 라이브러리 없이 변환 관계를 보여줄 수 있다. 제목은 마크업으로 해석되지 않도록 이스케이프한다. 고정 크기 학습 예제라 긴 제목은 이미지 영역 밖으로 잘릴 수 있다.
+
+```bash
+curl -sS -D /tmp/article-preview.headers \
+  http://localhost:8080/articles/preview \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: image/svg+xml' \
+  --data '{"title":"HTTP 헤더"}' \
+  -o /tmp/article-preview.svg
+```
+
+저장한 SVG를 브라우저로 열면 이미지가 보인다. API는 POST이므로 주소창으로 API URL을 여는 GET 요청과는 다르다.
+
+브라우저에서 직접 비교하려면 서버 실행 후 `http://localhost:8080/preview.html`을 연다. 제목과 Accept를 선택하면 같은 JSON 요청으로 JSON·텍스트·SVG 응답을 비교한다. SVG는 fetch의 Blob 결과를 img에 표시한다. 이 페이지는 서버를 통해 열어야 한다.
+
+이미지 추가 검증(2026-10-24): 전체 테스트 8개 통과. SVG 응답의 MIME 타입·XML 구조·한글 제목 및 마크업 이스케이프 확인. 브라우저 비교 화면은 JavaScript 문법 검사 완료, 실제 브라우저 렌더링은 미확인.
