@@ -1,0 +1,74 @@
+/* 스킨 CSS에 한 번 추가. inspire-table 클래스를 가진 표에만 적용합니다. */
+.inspire-table-wrap {
+  margin: 24px 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #253247;
+}
+.inspire-table-wrap:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.inspire-table-wrap table.inspire-table {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #253247;
+  background: #fff;
+}
+.inspire-table-wrap table.inspire-table--2 { min-width: 360px; }
+.inspire-table-wrap table.inspire-table--3 { min-width: 600px; }
+.inspire-table-wrap .inspire-table caption {
+  padding: 14px 18px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 16px;
+  color: #172b4d;
+  background: #fff;
+  caption-side: top;
+}
+.inspire-table-wrap .inspire-table th,
+.inspire-table-wrap .inspire-table td {
+  padding: 14px 18px;
+  border: 0;
+  border-top: 1px solid #e5eaf0;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.inspire-table-wrap .inspire-table thead th {
+  background: #edf3fa;
+  color: #183b66;
+  font-weight: 700;
+}
+.inspire-table-wrap .inspire-table tbody th { font-weight: 600; }
+.inspire-table-wrap .inspire-table tbody tr:nth-child(even) { background: #f8fafc; }
+.inspire-table-wrap .inspire-table code {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: #eaf0f7;
+  color: #174675;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .9em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.inspire-table-wrap .inspire-table p { margin: 0 0 8px; }
+.inspire-table-wrap .inspire-table p:last-child { margin-bottom: 0; }
+.inspire-table-note { color: #526077; font-size: 14px; line-height: 1.7; }
+@media (max-width: 600px) {
+  .inspire-table-wrap .inspire-table th,
+  .inspire-table-wrap .inspire-table td { padding: 12px; }
+}
+@media print {
+  .inspire-table-wrap { overflow: visible; }
+  .inspire-table-wrap table.inspire-table { min-width: 0; }
+}

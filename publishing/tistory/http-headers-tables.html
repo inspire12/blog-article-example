@@ -1,0 +1,88 @@
+<!-- HTML 모드에 붙여 넣는 본문 조각입니다. tables.css를 스킨에 먼저 적용하세요. -->
+
+<h2>HTTP Header를 역할별로 묶어 보기</h2>
+
+<p>요청은 클라이언트에서 서버로, 응답은 서버에서 클라이언트로 보내는 방향입니다. 아래 분류는 기능을 이해하기 위한 묶음이며, 하나의 헤더가 여러 역할에 쓰일 수 있습니다.</p>
+
+<p class="inspire-table-note">작은 화면에서는 표를 좌우로 밀어 확인할 수 있습니다. 아래 확인 항목은 실습 계획이며 실제 실행 결과가 아닙니다.</p>
+
+<div class="inspire-table-wrap" role="region" aria-label="표현 선택과 압축" tabindex="0">
+<table class="inspire-table inspire-table--3">
+<caption>표현 선택과 압축</caption>
+<colgroup><col style="width: 22%"><col style="width: 38%"><col style="width: 40%"></colgroup>
+<thead><tr><th scope="col">역할</th><th scope="col">함께 볼 헤더</th><th scope="col">구현·확인할 동작</th></tr></thead>
+<tbody>
+<tr><th scope="row">표현 선택·해석: 어떤 형식·언어를 주고받나?</th><td>요청 <code>Accept</code>, <code>Accept-Language</code><br>요청·응답 <code>Content-Type</code><br>응답 <code>Content-Language</code>, <code>Vary</code></td><td>구현: 지원하는 표현 선택과 본문 파싱<br>확인: 요청 선호, 실제 본문, 응답 타입·언어 비교</td></tr>
+<tr><th scope="row">압축: 같은 내용을 더 적은 바이트로 보내나?</th><td>요청 <code>Accept-Encoding</code><br>응답 <code>Content-Encoding</code>, <code>Vary</code><br><code>Content-Length</code>가 있다면 함께 확인</td><td>구현: 지원하는 압축 방식 선택과 실제 압축<br>확인: 헤더뿐 아니라 압축 바이트·복원 결과 비교</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="inspire-table-wrap" role="region" aria-label="캐시와 재검증" tabindex="0">
+<table class="inspire-table inspire-table--3">
+<caption>캐시와 재검증</caption>
+<colgroup><col style="width: 22%"><col style="width: 38%"><col style="width: 40%"></colgroup>
+<thead><tr><th scope="col">역할</th><th scope="col">함께 볼 헤더</th><th scope="col">구현·확인할 동작</th></tr></thead>
+<tbody>
+<tr><th scope="row">캐시: 저장·재사용·재검증은 언제 하나?</th><td>요청·응답 <code>Cache-Control</code><br>응답 <code>ETag</code>, <code>Last-Modified</code>, <code>Vary</code>, <code>Date</code>, <code>Age</code><br>요청 <code>If-None-Match</code>, <code>If-Modified-Since</code></td><td>구현: 캐시 정책 설정과 조건부 GET 처리<br>확인: 저장된 응답 재사용 여부, 재검증 요청, <code>200</code>·<code>304</code>와 본문</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="inspire-table-wrap" role="region" aria-label="인증과 상태 유지" tabindex="0">
+<table class="inspire-table inspire-table--3">
+<caption>인증과 상태 유지</caption>
+<colgroup><col style="width: 22%"><col style="width: 38%"><col style="width: 40%"></colgroup>
+<thead><tr><th scope="col">역할</th><th scope="col">함께 볼 헤더</th><th scope="col">구현·확인할 동작</th></tr></thead>
+<tbody>
+<tr><th scope="row">인증: 어떤 자격 증명을 요구·제출하나?</th><td>응답 <code>WWW-Authenticate</code><br>요청 <code>Authorization</code></td><td>구현: 서버에서 자격 증명 검증<br>확인: 인증 정보 없는 요청·잘못된 요청·유효한 요청 비교</td></tr>
+<tr><th scope="row">상태 유지: 이전 요청과 어떻게 연결하나?</th><td>응답 <code>Set-Cookie</code><br>요청 <code>Cookie</code></td><td>구현: 쿠키 발급과 후속 요청의 세션 조회<br>확인: 브라우저 저장 상태와 실제 후속 요청</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="inspire-table-wrap" role="region" aria-label="브라우저 정책" tabindex="0">
+<table class="inspire-table inspire-table--3">
+<caption>브라우저 정책</caption>
+<colgroup><col style="width: 22%"><col style="width: 38%"><col style="width: 40%"></colgroup>
+<thead><tr><th scope="col">역할</th><th scope="col">함께 볼 헤더</th><th scope="col">구현·확인할 동작</th></tr></thead>
+<tbody>
+<tr><th scope="row">CORS: 다른 출처의 스크립트가 응답을 읽어도 되나?</th><td>요청 <code>Origin</code>, <code>Access-Control-Request-Method</code>, <code>Access-Control-Request-Headers</code><br>응답 <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code>, <code>Access-Control-Allow-Credentials</code>, <code>Access-Control-Expose-Headers</code>, <code>Vary</code></td><td>구현: 허용 출처·메서드·헤더 처리<br>확인: OPTIONS와 실제 요청, 브라우저 fetch 결과</td></tr>
+<tr><th scope="row">브라우저 보안 정책: 무엇을 로드·실행할 수 있나?</th><td>응답 <code>Content-Security-Policy</code><br>확장 후보 <code>Strict-Transport-Security</code>, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code></td><td>구현: 이번 실습은 CSP의 스크립트 제한에 집중<br>확인: 허용·차단된 스크립트와 브라우저 콘솔</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="inspire-table-wrap" role="region" aria-label="이동과 다운로드" tabindex="0">
+<table class="inspire-table inspire-table--3">
+<caption>이동과 다운로드</caption>
+<colgroup><col style="width: 22%"><col style="width: 38%"><col style="width: 40%"></colgroup>
+<thead><tr><th scope="col">역할</th><th scope="col">함께 볼 헤더</th><th scope="col">구현·확인할 동작</th></tr></thead>
+<tbody>
+<tr><th scope="row">이동·다운로드·부분 조회: 어디로 가고 어떻게 받을까?</th><td>응답 <code>Location</code>, <code>Content-Disposition</code>, <code>Accept-Ranges</code>, <code>Content-Range</code><br>요청 <code>Range</code>, <code>If-Range</code></td><td>구현: 리다이렉트·첨부 다운로드·부분 응답을 각각 구현<br>확인: 상태 코드, 이동 대상, 다운로드, 실제 바이트 범위</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<div class="inspire-table-wrap" role="region" aria-label="캐시 재검증에서 함께 보는 헤더" tabindex="0">
+<table class="inspire-table inspire-table--2">
+<caption>캐시 재검증에서 함께 보는 헤더</caption>
+<colgroup><col style="width: 30%"><col style="width: 70%"></colgroup>
+<thead><tr><th scope="col">헤더</th><th scope="col">역할</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>Cache-Control</code></th><td>응답을 저장하고 재사용하는 정책을 전달한다.</td></tr>
+<tr><th scope="row"><code>ETag</code></th><td>응답 표현의 검증자를 전달한다.</td></tr>
+<tr><th scope="row"><code>If-None-Match</code></th><td>클라이언트가 가진 검증자를 조건으로 보낸다.</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<p>같은 표현에 대한 조건부 GET 요청에는 서버가 본문 없이 <code>304 Not Modified</code>로 응답할 수 있습니다. 304는 헤더가 아니라 상태 코드입니다.</p>
+
+<p>참고: <a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Headers">MDN HTTP 헤더</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching">MDN HTTP 캐시</a>. 세부 근거와 실습 계획은 GitHub 원문에 함께 관리합니다.</p>

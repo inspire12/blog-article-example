@@ -10,6 +10,10 @@ HTTP 헤더는 요청·응답에 추가 정보를 담는다. 이 글에서는 �
 
 출발 자료: [MDN 한국어 헤더 목록](https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Headers). 세부 의미와 지원 여부는 [영문 목록](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers) 및 개별 문서와 대조한다. 목록에 있다는 이유만으로 모든 헤더를 현재 권장 기능으로 소개하지 않는다.
 
+## 티스토리용 표
+
+[적용 안내와 2열·3열 서식](../../publishing/tistory/README.md) · [이번 글에 붙여 넣을 HTML](../../publishing/tistory/http-headers-tables.html) · [공통 CSS](../../publishing/tistory/tables.css) · [로컬 미리보기](../../publishing/tistory/preview.html). 역할별 지도를 작은 3열 표로 나누고 캐시 설명에 2열 표를 적용했다. 실제 티스토리 반영은 아직 하지 않았다.
+
 ## 역할별 지도
 
 ‘요청’은 클라이언트가 서버로, ‘응답’은 서버가 클라이언트로 보내는 방향이다. 브라우저가 자동으로 관리하는 헤더도 있으므로 모든 요청 헤더를 JavaScript에서 임의로 설정할 수 있다고 가정하지 않는다.
