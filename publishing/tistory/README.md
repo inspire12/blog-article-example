@@ -8,6 +8,10 @@
 - [http-headers-tables.html](http-headers-tables.html): 이번 HTTP Header 글에 넣을 표 본문 조각. 글 전체가 아니다.
 - [preview.html](preview.html): 브라우저로 열어 볼 독립 미리보기. 이 파일 전체를 글에 붙여 넣지 않는다.
 
+## 간단한 HTTP Header 요약표
+
+[http-headers-summary.html](http-headers-summary.html)은 역할과 핵심 헤더 8개 항목을 담은 2열 표다. 공통 CSS를 적용한 뒤 이 파일의 소스를 글의 HTML 모드에 붙여 넣는다. `preview.html` 상단에서 확인할 수 있다.
+
 ## 공통 CSS 설치
 
 티스토리 관리자에서 꾸미기 → 스킨 편집 → HTML 편집의 CSS 영역을 연다. 기존 CSS를 백업한 뒤 `tables.css` 내용을 끝에 추가하고 저장한다. CSS 파일에는 `<style>` 태그를 붙이지 않는다. 관리자 메뉴는 버전에 따라 다를 수 있다.
