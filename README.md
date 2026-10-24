@@ -1,6 +1,10 @@
-# Blog Examples
+# Knowledge & Growth
 
-블로그 글에 사용하는 실행 가능한 예제와 기획 문서를 모으는 저장소입니다. 각 예제는 독립된 폴더에서 의존성을 설치하고 실행합니다.
+개인 지식을 총정리하고 퀴즈·면접·실험으로 이해를 검증하며, 블로그를 통해 전문성을 쌓는 프로젝트입니다. GitHub에서 지식과 성장 이력을 관리하고 [티스토리](https://inspire12.tistory.com)에 검증한 내용을 공유합니다.
+
+시작점: [지식과 성장 지도](docs/README.md) · [퀴즈](docs/practice/quiz.md) · [면접 연습](docs/practice/interview.md) · [학습 기록](docs/practice/log.md) · [블로그 개선 계획](docs/blog/README.md)
+
+실행 가능한 예제는 독립된 폴더에서 의존성을 설치하고 실행합니다.
 
 ## 구성
 
@@ -8,6 +12,10 @@
 examples/
   rest-graphql-nestjs/  # NestJS REST Controller와 GraphQL Resolver 비교
 docs/
+  README.md           # 지식 지도와 학습 흐름
+  practice/           # 퀴즈·면접·학습 기록
+  templates/          # 지식 노트 양식
+  blog/               # 블로그 개선·발행 관리
   ai-backend/          # AI 백엔드 학습 기획과 OWASP 블로그 초안
 output/
   diagrams/            # 블로그 다이어그램 SVG 원본과 PNG 이미지
