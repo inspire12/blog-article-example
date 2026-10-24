@@ -52,3 +52,16 @@ curl -i http://localhost:8080/articles/preview \
 ## 실제 검증 결과
 
 2026-10-24, macOS arm64 / Amazon Corretto 21.0.3 / Gradle 8.13 / Spring Boot 3.5.7에서 `gradle test wrapper --gradle-version 8.13 --no-daemon` 성공. MockMvc 테스트 5개 통과(실패·오류 0). JSON·텍스트 응답과 400·406·415를 확인했다. curl을 통한 실제 소켓 요청 및 티스토리 발행은 아직 실행하지 않았다.
+
+## 응답 압축 예제
+
+`GET /compression/article`은 반복되는 UTF-8 텍스트를 반환한다. `application.properties`에서 응답 압축을 활성화하고 최소 크기를 1KB로 설정했다. 내장 Tomcat이 gzip 처리를 담당한다.
+
+```bash
+curl -i -H 'Accept-Encoding: identity' http://localhost:8080/compression/article
+curl --compressed http://localhost:8080/compression/article
+```
+
+원시 gzip 바이트를 파일로 저장·복원하는 명령은 [압축 본문](../../docs/http-headers/SECTION-02-compression.md)에 있다. `--compressed`는 자동 복원하므로 압축 크기 측정에는 사용하지 않는다.
+
+2026-10-24: 전체 테스트 6개 성공. 기존 MockMvc 5개에 더해 `CompressionTest`가 RANDOM_PORT로 내장 Tomcat을 기동하고 Java HttpClient로 실제 소켓 요청을 보냈다. identity 응답은 Content-Encoding 없음, gzip 응답은 Content-Encoding: gzip 및 Vary: Accept-Encoding 확인. gzip 복원 결과와 원문 바이트 일치. 반복 문장 200회의 원문은 13,800바이트, gzip 본문은 167바이트였다. 실제 서비스 압축률이나 응답 시간 개선을 대표하는 측정이 아니다. curl 명령 자체의 실행은 미검증이다.

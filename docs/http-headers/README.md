@@ -136,3 +136,7 @@ curl -i -H 'If-None-Match: "article-v1"' http://localhost:3000/article
 ## 표현 선택·해석 본문과 예제
 
 [Accept·Content-Type 본문](SECTION-01-representation.md) · [Spring 실행 예제](../../examples/http-headers-spring/README.md) · [요청·응답 도식](../../output/diagrams/http-accept-content-type.png). 기존 1편 초안에서 해당 절을 편집할 때 사용할 확장 원고다.
+
+## 압축 본문과 예제
+
+[Accept-Encoding·Content-Encoding 본문](SECTION-02-compression.md) · [Spring 실행 예제](../../examples/http-headers-spring/README.md) · [압축 요청·응답 도식](../../output/diagrams/http-compression.png). 실제 HTTP 압축·복원 검증 완료. 블로그 발행 전.
