@@ -1,4 +1,4 @@
-# HTTP 헤더, 이름보다 역할부터 이해하기
+# HTTP 헤더 1편: 무엇을 주고 어떻게 받을까?
 
 최근 CS 기본기를 혼자 공부하다가 HTTP Header에 대해 헷갈리는 부분이 있어 따로 정리하기 시작했습니다. `Content-Type`이나 `Authorization`처럼 개발하면서 자주 사용하는 헤더도 있지만, 각각의 설정을 알고 있는 것과 요청·응답 안에서 어떤 역할을 하는지 설명하는 것은 조금 달랐습니다.
 
@@ -86,43 +86,33 @@ Spring에서는 `consumes`로 받을 요청 형식을, `produces`로 제공할 �
 
 참고: [MDN Accept](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) · [MDN Content-Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type) · [Spring 요청 매핑](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html)
 
-### 압축
+### 압축: 압축해서 보내도 데이터의 형식은 그대로다
 
-텍스트나 JSON을 압축해서 보낼 때는 `Accept-Encoding`과 `Content-Encoding`을 함께 봅니다. 어떤 방식으로 압축해도 되는지 요청에서 알리고, 실제 적용한 방식은 응답에 표시합니다. 압축을 풀고 난 내용의 형식은 여전히 Content-Type으로 설명합니다. [압축 본문과 예제](SECTION-02-compression.md)
+앞에서는 Content-Type으로 본문의 형식을 알려준다고 했습니다. 그렇다면 JSON을 gzip으로 압축해서 보내면 Content-Type도 바뀌어야 할까요?
 
-### 캐시·재검증
+두 헤더를 같이 보면 구분하기 쉽습니다.
 
-캐시는 단순히 켜고 끄는 기능보다 질문이 많습니다. 응답을 저장해도 되는지, 얼마나 오래 재사용할 수 있는지, 저장한 내용이 바뀌었는지를 확인해야 합니다.
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
 
-`Cache-Control`은 저장·재사용 정책을 전달하고, `ETag`와 `If-None-Match`는 저장된 표현의 유효성을 확인하는 데 함께 사용됩니다. `Vary`는 응답을 재사용할 때 어떤 요청 헤더를 추가로 고려할지 알려줍니다. 이들은 서로 다른 질문을 담당합니다. [MDN HTTP 캐시](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)
+본문을 gzip으로 압축했지만, 압축을 풀면 나오는 내용은 여전히 JSON입니다. Content-Type은 그 데이터의 형식을, Content-Encoding은 적용한 인코딩을 설명합니다.
 
-### 인증과 상태 유지
+클라이언트는 요청할 때 자신이 처리할 수 있는 방식을 알려줍니다.
 
-`Authorization`은 클라이언트가 자격 증명을 전달하는 헤더이고, `WWW-Authenticate`는 서버가 사용할 인증 방식 등을 알리는 헤더입니다. 실제 검증과 접근 허용 여부는 서버가 결정합니다. [MDN HTTP 인증](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication)
+```http
+Accept-Encoding: gzip
+```
 
-쿠키는 요청 사이에 상태를 이어가는 데 쓰입니다. 서버가 `Set-Cookie`로 쿠키를 전달하면, 브라우저는 저장·전송 조건에 따라 후속 요청의 `Cookie`에 값을 담습니다. 세션 식별에 사용할 수 있지만, 쿠키의 용도가 로그인에만 한정되는 것은 아닙니다. [MDN 쿠키](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)
+서버는 이 조건과 자신의 설정을 보고 압축 여부를 결정합니다. 헤더에 gzip이라고 적는 것만으로 압축되는 것은 아니고, 실제 본문도 압축해야 합니다.
 
-### 다른 출처의 응답 읽기와 브라우저 보안 정책
+![응답 압축과 복원](../../output/diagrams/http-compression.png)
 
-CORS는 다른 출처의 응답을 브라우저에서 읽을 수 있는지와 관련됩니다. 요청의 `Origin`, 응답의 `Access-Control-Allow-Origin` 등을 함께 봅니다. 서버의 인증·인가를 대신하는 기능은 아니며, 브라우저의 읽기 제한과 서버의 접근 검사를 구분해야 합니다. [MDN CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS)
+Spring Boot 예제에서는 내장 서버가 응답을 압축하도록 설정했습니다. 반복 문장으로 만든 텍스트 응답이 13,800바이트에서 167바이트로 줄었고, gzip으로 받은 본문을 다시 풀었을 때 원문과 같다는 것을 확인했습니다. 같은 문장을 반복한 데이터라 압축이 잘되는 조건입니다. 실제 서비스의 평균 압축률로 볼 수는 없습니다.
 
-`Content-Security-Policy`는 페이지에서 어떤 리소스를 불러오거나 실행할 수 있는지 등의 정책을 브라우저에 전달합니다. CORS와 마찬가지로 브라우저 동작에 관여하지만, 제어하려는 대상은 다릅니다. [MDN CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy)
+예제를 확인할 때 한 가지 주의할 점도 있습니다. `curl --compressed`는 응답을 자동으로 풀어줍니다. 결과가 읽을 수 있는 텍스트라고 해서 압축되지 않은 것은 아닙니다.
 
-### 이동·다운로드·부분 조회
+[압축 설정과 검증 코드는 GitHub](https://github.com/inspire12/blog-article-example/tree/main/examples/http-headers-spring)에 정리했습니다. [MDN Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding)에서 세부 설명을 볼 수 있습니다.
 
-브라우저를 다른 위치로 이동시키거나, 파일을 첨부 형태로 내려주거나, 리소스의 일부만 요청할 때도 헤더를 사용합니다. 각각 `Location`, `Content-Disposition`, `Range`를 출발점으로 찾아볼 수 있습니다. 실제 동작은 상태 코드와 관련 응답 헤더까지 함께 확인해야 합니다. [MDN 헤더 목록](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers)
-
-## 헤더를 설정하는 것과 기능이 동작하는 것은 다르다
-
-정리하면서 계속 확인하게 된 점은, 헤더가 실제 처리를 대신하지는 않는다는 것입니다.
-
-`Content-Encoding: gzip`이라고 적는 것만으로 본문이 압축되지는 않습니다. `Authorization`에 토큰이 있다고 인증이 완료되는 것도 아닙니다. 헤더는 필요한 정보를 전달하고, 서버·브라우저·캐시가 그 정보에 맞는 처리를 수행해야 합니다.
-
-그래서 헤더를 공부할 때는 다음 질문을 함께 가져가려고 합니다.
-
-1. 누가 보내는 헤더인가?
-2. 받는 쪽에 무엇을 알리거나 요구하는가?
-3. 실제로 어떤 처리가 필요한가?
-4. 헤더 외에 상태 코드·본문·브라우저 동작 중 무엇을 확인해야 하는가?
-
-이번 글은 그 질문을 시작하기 위한 역할 지도입니다. 다음 글에서는 표현 선택과 압축부터 요청·응답을 따라가며 살펴보려고 합니다. 캐시와 인증처럼 설명할 내용이 많은 주제도 각각 나누어 이어가겠습니다.
+이번에는 데이터를 어떤 형식으로 주고받고, 어떻게 압축해서 전달하는지 살펴봤습니다. 다음 편에서는 받은 응답을 다시 사용하는 캐시와, 사용자를 확인하고 요청 사이의 상태를 이어가는 인증·쿠키를 살펴보겠습니다.
