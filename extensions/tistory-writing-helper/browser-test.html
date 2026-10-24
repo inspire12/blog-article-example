@@ -1,0 +1,58 @@
+<!doctype html><meta charset="utf-8"><body><div id="editor" contenteditable="true"></div><pre id="results">RUNNING</pre>
+<script type="module">
+import {preparePaste, installAutoPaste} from './auto-paste.mjs';
+const results=[];
+function check(name, fn) {try {fn();results.push('PASS '+name);}catch(e){results.push('FAIL '+name+': '+e.message);}}
+function assert(value) {if(!value) throw Error('assertion failed');}
+const input='<p>앞 문장</p><table><thead><tr><th>역할</th><th>헤더</th><th></th></tr></thead><tbody><tr><td>인증</td><td><a href="https://example.com"><code>Authorization</code></a></td><td></td></tr></tbody></table><p>뒤 문장</p>';
+check('HTML: header, empty column, surrounding prose, rich cell content',()=>{
+ const out=preparePaste(input,'');const doc=new DOMParser().parseFromString(out,'text/html');
+ assert(!doc.querySelector('thead,th'));assert(doc.querySelectorAll('td').length===4);
+ assert(doc.querySelector('tbody tr:first-child strong').textContent==='역할');
+ assert(doc.querySelector('a code').textContent==='Authorization');assert(doc.body.textContent.includes('앞 문장')&&doc.body.textContent.includes('뒤 문장'));
+});
+check('merged cells untouched',()=>assert(preparePaste('<table><tr><th colspan="2">x</th></tr></table>','')===null));
+check('nested tables untouched',()=>assert(preparePaste('<table><tr><td><table><tr><td>x</td></tr></table></td></tr></table>','')===null));
+check('standalone Markdown',()=>assert(preparePaste('','| A | B |\n| - | - |\n| c | d |').includes('<strong>A</strong>')));
+check('mixed Markdown prose preserved by fallback',()=>assert(preparePaste('','intro\n| A | B |\n| - | - |')===null));
+check('ordinary text untouched',()=>assert(preparePaste('','hello')===null));
+const settings={enabled:true};
+installAutoPaste({document,get tinymce(){return window.tinymce;},top:{location:{href:'https://example.tistory.com/manage/newpost/'}},addEventListener:(...args)=>window.addEventListener(...args)},settings);
+function paste() {
+ const data=new DataTransfer();data.setData('text/html',input);data.setData('text/plain','original plain');
+ const event=new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:data});
+ document.querySelector('#editor').dispatchEvent(event);return event;
+}
+check('original paste event exposes converted HTML to editor without cancellation',()=>{
+ const event=paste();assert(event.clipboardData.getData('text/html').includes('<strong>역할</strong>'));assert(!event.defaultPrevented);assert(event.clipboardData.getData('text/plain')==='original plain');
+});
+check('TinyMCE receives one insertion and native paste is cancelled',()=>{
+ let inserts=0, transactions=0;
+ window.tinymce={get:()=>[{getBody:()=>document.querySelector('#editor'),insertContent:html=>{assert(html.includes('<strong>역할</strong>'));inserts++;},undoManager:{transact:fn=>{transactions++;fn();}}}]};
+ const event=paste();assert(event.defaultPrevented);assert(inserts===1&&transactions===1);delete window.tinymce;
+});
+check('Markdown with HTML wrapper',()=>assert(preparePaste('<pre>| A | B |\n| - | - |\n| c | d |</pre>','| A | B |\n| - | - |\n| c | d |').includes('<strong>A</strong>')));
+check('disabled setting leaves clipboard untouched',()=>{settings.enabled=false;assert(paste().clipboardData.getData('text/html')===input);});
+settings.enabled=true;
+const frame=document.createElement('iframe');
+const loaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));
+frame.srcdoc='<body contenteditable="true"></body>';document.body.append(frame);await loaded;
+check('late-created editor iframe is intercepted',()=>{
+ let inserts=0;
+ window.tinymce={get:()=>[{getBody:()=>frame.contentDocument.body,insertContent:html=>{assert(html.includes('<strong>역할</strong>'));inserts++;},undoManager:{transact:fn=>fn()}}]};
+ const data=new DataTransfer();data.setData('text/html',input);
+ const event=new frame.contentWindow.ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:data});
+ frame.contentDocument.body.dispatchEvent(event);assert(event.defaultPrevented&&inserts===1);delete window.tinymce;
+});
+frame.contentDocument.open();frame.contentDocument.write('<body contenteditable="true"></body>');frame.contentDocument.close();
+// Explicitly deliver the iframe load notification after the document rewrite.
+frame.dispatchEvent(new Event('load'));
+check('document.open rewrite reconnects paste exactly once',()=>{
+ let inserts=0;
+ window.tinymce={get:()=>[{getBody:()=>frame.contentDocument.body,insertContent:()=>inserts++,undoManager:{transact:fn=>fn()}}]};
+ const data=new DataTransfer();data.setData('text/html',input);
+ const event=new frame.contentWindow.ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:data});
+ frame.contentDocument.body.dispatchEvent(event);assert(event.defaultPrevented&&inserts===1);delete window.tinymce;
+});
+document.querySelector('#results').textContent=results.join('\n');
+</script>

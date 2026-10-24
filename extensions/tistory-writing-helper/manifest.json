@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "티스토리 글쓰기 도우미",
+  "version": "0.2.3",
+  "description": "ChatGPT 표를 제목 행이 유지되는 티스토리용 표로 변환하고 복사합니다.",
+  "permissions": [
+    "clipboardWrite",
+    "storage"
+  ],
+  "action": {
+    "default_title": "티스토리 글쓰기 도우미",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.tistory.com/manage/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false,
+      "match_about_blank": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://*.tistory.com/manage/*"
+      ],
+      "js": [
+        "settings.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false,
+      "match_about_blank": true,
+      "world": "ISOLATED"
+    }
+  ]
+}

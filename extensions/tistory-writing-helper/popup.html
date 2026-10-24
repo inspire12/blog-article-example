@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>티스토리 글쓰기 도우미</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<header><span class="badge">TABLE HELPER</span><h1>티스토리 글쓰기 도우미</h1><p>표의 첫 줄까지, 깔끔하게 붙여 넣으세요.</p></header>
+<main>
+<div class="auto-setting"><label><input id="auto" type="checkbox" checked> 티스토리에 표 붙여넣을 때 자동 변환</label><p class="hint">기본 모드에서 바로 붙여 넣으세요. 아래 수동 변환도 사용할 수 있습니다.</p></div>
+<label for="source">1. ChatGPT 표 붙여넣기</label>
+<p class="hint">원본 표를 복사해 아래에 붙여 넣거나 마크다운 표를 입력하세요.</p>
+<textarea id="source" placeholder="여기에 표를 붙여 넣으세요" spellcheck="false"></textarea>
+<div class="options"><label><input id="trim" type="checkbox" checked> 완전히 빈 열 제거</label><button id="example" class="subtle">예시 넣기</button></div>
+<button id="convert" class="secondary">표 변환하기</button>
+<label class="preview-label">2. 미리보기</label>
+<div id="preview"><p class="empty">변환한 표가 여기에 표시됩니다.</p></div>
+<p id="status" role="status" aria-live="polite">표의 첫 행을 제목 행으로 사용합니다.</p>
+<div class="actions"><button id="copy" disabled>티스토리용 표 복사</button><button id="html" class="secondary" disabled>HTML 복사</button></div>
+<p class="hint">표 복사 → 티스토리 <b>기본 모드</b>에서 ⌘V / Ctrl+V<br>HTML 복사는 <b>HTML 모드</b>에서 사용하세요.</p>
+<footer>표는 이 기기에서만 처리됩니다. 외부 전송 없이 사용할 수 있어요.</footer>
+</main><script type="module" src="popup.mjs"></script>
+</body></html>
