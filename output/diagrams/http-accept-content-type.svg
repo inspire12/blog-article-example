@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#2563eb" stroke-width="2"/></marker></defs>
+<rect width="1200" height="760" fill="#f4f7fb"/>
+<g font-family="Apple SD Gothic Neo, Noto Sans CJK KR, sans-serif" fill="#182b49">
+<text x="60" y="65" font-size="30" font-weight="700">Accept와 Content-Type은 서로 다른 대상을 설명합니다</text>
+<text x="60" y="103" font-size="19" fill="#50627b">JSON으로 요청하고, 텍스트로 응답받는 Spring MVC 예제</text>
+<rect x="60" y="140" width="260" height="75" rx="14" fill="#dfeafa"/>
+<rect x="880" y="140" width="260" height="75" rx="14" fill="#dfeafa"/>
+<text x="190" y="187" text-anchor="middle" font-size="24" font-weight="700">클라이언트</text>
+<text x="1010" y="187" text-anchor="middle" font-size="24" font-weight="700">Spring 서버</text>
+<path d="M190 230 V660 M1010 230 V660" stroke="#c2ccda" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="280" y="240" width="640" height="190" rx="12" fill="white" stroke="#d6deea"/>
+<text x="305" y="273" font-size="18" font-weight="700">① 요청 · POST /articles/preview</text>
+<text x="305" y="309" font-size="20" font-family="monospace">Content-Type: application/json</text>
+<text x="305" y="339" font-size="20" font-family="monospace">Accept: text/plain</text>
+<text x="305" y="370" font-size="19">본문: {&quot;title&quot;:&quot;HTTP 헤더&quot;}</text>
+<text x="305" y="408" font-size="18" fill="#50627b">보내는 본문은 JSON / 받고 싶은 응답은 텍스트</text>
+<path d="M190 445 H1010" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="1140" y="475" text-anchor="end" font-size="17" fill="#50627b">consumes → 요청 형식 · produces → 응답 형식</text>
+<rect x="280" y="500" width="640" height="125" rx="12" fill="white" stroke="#d6deea"/>
+<text x="305" y="532" font-size="18" font-weight="700">② 응답 · 200 OK</text>
+<text x="305" y="567" font-size="19" font-family="monospace">Content-Type: text/plain;charset=UTF-8</text>
+<text x="305" y="603" font-size="19">본문: Preview: HTTP 헤더</text>
+<path d="M1010 645 H190" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="60" y="710" font-size="19" fill="#50627b">Content-Type = 이 메시지의 본문 형식     Accept = 클라이언트가 수용할 응답 형식</text>
+</g></svg>

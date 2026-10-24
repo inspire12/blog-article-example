@@ -132,3 +132,7 @@ curl -i -H 'If-None-Match: "article-v1"' http://localhost:3000/article
 3. curl은 성공하고 브라우저 fetch는 실패했다. 무엇을 추가로 확인해야 하는가?
 4. Set-Cookie가 응답에 있다는 사실만으로 다음 요청에 Cookie가 실린다고 결론 내릴 수 있는가?
 5. 헤더를 설정한 것과 그 기능을 구현한 것은 어떤 차이가 있는가?
+
+## 표현 선택·해석 본문과 예제
+
+[Accept·Content-Type 본문](SECTION-01-representation.md) · [Spring 실행 예제](../../examples/http-headers-spring/README.md) · [요청·응답 도식](../../output/diagrams/http-accept-content-type.png). 기존 1편 초안에서 해당 절을 편집할 때 사용할 확장 원고다.
