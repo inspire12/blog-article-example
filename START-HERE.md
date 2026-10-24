@@ -8,7 +8,8 @@
 이 저장소는 개인 지식 정리와 성장, 블로그 전문성 강화를 위한 프로젝트다.
 git status와 README.md, docs/README.md, docs/practice/log.md를 읽어줘.
 별도 요청이 없으면 마지막 학습 기록의 미해결 질문부터 이어가고,
-기록이 없으면 GraphQL 첫 진단 퀴즈를 한 문제씩 내고 내 답변을 기다려줘.
+기록이 없으면 docs/README.md의 현재 우선 주제를 확인해줘.
+현재는 docs/http-headers/README.md의 글 구성과 실습 계획부터 이어가줘.
 실제 답변과 근거를 기록하고 검증하지 않은 내용은 미검증으로 표시해줘.
 블로그 작업은 docs/blog/README.md를 따르고 실제 발행은 요청받았을 때 해줘.
 ```

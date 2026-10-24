@@ -24,6 +24,7 @@ START-HERE.md          # 다른 컴퓨터에서 이어서 작업할 시작 프�
 
 | 주제 | 문서 | 상태 |
 | --- | --- | --- |
+| HTTP Header 역할과 검증 | [글 구성·역할별 지도·실습 계획](docs/http-headers/README.md) | 이번 주 작성·실습 전 |
 | NestJS REST vs GraphQL | [예제 실행 안내](examples/rest-graphql-nestjs/README.md) | 구현 완료 |
 | AI 백엔드 학습·주문/환불 도우미 | [기획안](docs/ai-backend/README.md) · [로드맵](docs/ai-backend/ROADMAP.md) | 기획 단계 |
 | OWASP LLM Top 10 2025 | [블로그 초안](docs/ai-backend/BLOG-owasp-llm-top10-2025.md) | 초안 작성 |
