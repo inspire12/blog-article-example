@@ -82,9 +82,15 @@ Preview: HTTP 헤더
 
 ![JSON 요청과 텍스트 응답](../../output/diagrams/http-accept-content-type.png)
 
-#### 실제 요청 다뤄보기
+#### 실제 표현 선택 다뤄보기
 
-Spring에서는 컨트롤러의 매핑 어노테이션에서 `consumes`로 받을 요청 형식을, `produces`로 제공할 응답 형식을 지정할 수 있습니다. 예제에서는 같은 URL에 JSON·텍스트 응답을 준비하고 `Accept`에 따라 선택하도록 했습니다.
+Spring에서는 컨트롤러의 매핑 어노테이션에서 `consumes`로 받을 요청 형식을, `produces`로 제공할 응답 형식을 지정할 수 있습니다.
+
+```java
+@PostMapping(value = "/articles/preview", consumes = "application/json", produces = "text/plain;charset=UTF-8")
+```
+
+위 설정은 JSON 요청을 받아 텍스트 응답을 제공하는 메서드의 매핑 조건입니다. 예제에서는 같은 URL에 JSON·텍스트 응답을 준비하고 `Accept`에 따라 선택하도록 했습니다.
 
 다만 헤더를 바꾼다고 본문까지 자동으로 바뀌는 것은 아닙니다. `Content-Type: application/json`이라고 선언했다면 본문도 실제 JSON이어야 하고, 서버가 JSON 응답을 제공하려면 그 응답을 만드는 처리도 있어야 합니다. Spring에서는 메시지 컨버터가 본문을 읽고 쓰는 변환을 담당합니다.
 
@@ -141,17 +147,15 @@ Vary: Accept-Encoding
 
 ![응답 압축과 복원](../../output/diagrams/http-compression.png)
 
-#### Spring Boot에서 압축해 보기
+#### 실제 압축 다뤄보기
 
 Spring Boot 예제에서는 내장 서버가 응답을 압축하도록 설정했습니다. Controller는 평소처럼 문자열을 반환하고, 내장 Tomcat이 실제 압축과 헤더 처리를 맡습니다.
 
 ```properties
 server.compression.enabled=true
-server.compression.mime-types=application/json,text/plain
-server.compression.min-response-size=1KB
 ```
 
-압축을 활성화하고, 대상 타입과 최소 응답 크기를 지정한 설정입니다. 별도로 gzip 처리 코드를 Controller에 넣을 필요는 없습니다. [Spring Boot 응답 압축 안내](https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.enable-response-compression)
+응답 압축을 켜는 핵심 설정입니다. 예제에서는 대상 타입을 JSON·텍스트로, 최소 응답 크기를 1KB로 추가 지정했습니다. 전체 설정은 GitHub 예제에 남겼습니다. 별도로 gzip 처리 코드를 Controller에 넣을 필요는 없습니다. [Spring Boot 응답 압축 안내](https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.enable-response-compression)
 
 예제의 반복 문장으로 만든 응답은 13,800바이트에서 167바이트로 줄었습니다. 같은 문장을 반복한 데이터라 압축이 잘되는 조건이긴 합니다. 이 수치 자체보다는 gzip으로 받은 본문을 다시 풀었을 때 원문과 같다는 점을 확인하는 데 의미가 있습니다. 본문 크기만 비교한 것이므로 응답 속도가 그 비율만큼 빨라졌다는 뜻도 아닙니다.
 

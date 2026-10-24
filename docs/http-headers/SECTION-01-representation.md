@@ -28,7 +28,15 @@ Preview: HTTP 헤더
 
 ![JSON 요청과 텍스트 응답](../../output/diagrams/http-accept-content-type.png)
 
-Spring에서는 `consumes`로 받을 요청 형식을, `produces`로 제공할 응답 형식을 지정할 수 있습니다. 예제에서는 같은 URL에 JSON·텍스트 응답을 준비하고 `Accept`에 따라 선택하도록 했습니다.
+#### 실제 표현 선택 다뤄보기
+
+Spring에서는 `consumes`로 받을 요청 형식을, `produces`로 제공할 응답 형식을 지정할 수 있습니다.
+
+```java
+@PostMapping(value = "/articles/preview", consumes = "application/json", produces = "text/plain;charset=UTF-8")
+```
+
+위 설정은 JSON 요청을 받아 텍스트 응답을 제공하는 메서드의 매핑 조건입니다. 예제에서는 같은 URL에 JSON·텍스트 응답을 준비하고 `Accept`에 따라 선택하도록 했습니다.
 
 다만 헤더를 바꾼다고 본문까지 자동으로 바뀌는 것은 아닙니다. `Content-Type: application/json`이라고 선언했다면 본문도 실제 JSON이어야 하고, 서버가 JSON 응답을 제공하려면 그 응답을 만드는 처리도 있어야 합니다. Spring에서는 메시지 컨버터가 본문을 읽고 쓰는 변환을 담당합니다.
 
