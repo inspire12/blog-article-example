@@ -84,3 +84,23 @@ curl -sS -D /tmp/article-preview.headers \
 브라우저에서 직접 비교하려면 서버 실행 후 `http://localhost:8080/preview.html`을 연다. 제목과 Accept를 선택하면 같은 JSON 요청으로 JSON·텍스트·SVG 응답을 비교한다. SVG는 fetch의 Blob 결과를 img에 표시한다. 이 페이지는 서버를 통해 열어야 한다.
 
 이미지 추가 검증(2026-10-24): 전체 테스트 8개 통과. SVG 응답의 MIME 타입·XML 구조·한글 제목 및 마크업 이스케이프 확인. 브라우저 비교 화면은 JavaScript 문법 검사 완료, 실제 브라우저 렌더링은 미확인.
+
+## 캐시·재검증 예제
+
+[2편 캐시 본문](../../docs/http-headers/BLOG-02-cache-auth-state.md) · [CacheController](src/main/java/com/example/headers/CacheController.java) · [CacheTest](src/test/java/com/example/headers/CacheTest.java)
+
+서버를 실행한 다음 순서대로 요청한다. `실제-응답-UUID`는 첫 응답의 ETag 값으로 바꾼다. 수정 후에도 이전 값을 보내야 변경 후 200을 확인할 수 있다.
+
+```bash
+curl -i http://localhost:8080/cache/article
+curl -i -H 'If-None-Match: W/"실제-응답-UUID"' http://localhost:8080/cache/article
+curl -i -X PUT http://localhost:8080/cache/article \
+  -H 'Content-Type: application/json' --data '{"title":"수정한 제목"}'
+curl -i -H 'If-None-Match: W/"실제-응답-UUID"' http://localhost:8080/cache/article
+```
+
+예상 순서는 200(본문·태그), 304(본문 없음), 204(수정 완료), 200(새 본문·새 태그)이다. UUID는 변경마다 새로 생성하며 약한 검증자로 제공한다. 데이터와 태그를 하나의 불변 스냅샷으로 저장해 서로 다른 버전이 조합되지 않도록 했다. DB나 인증이 없는 메모리 예제이며 재시작 시 초기화된다.
+
+`GET /cache/article/fresh`는 `private, max-age=60, must-revalidate` 정책을 제공한다. 브라우저에서 확인할 때 Network 탭의 Disable cache를 끄고 같은 URL을 다시 요청한다. 강제 새로고침은 일반적인 재사용과 다를 수 있다. `/cache/article`에 PUT을 보내도 별개 URL인 `/cache/article/fresh`의 기존 브라우저 캐시가 즉시 제거되는 것은 아니다.
+
+검증(2026-10-24): 전체 테스트 10개 통과, 실패·오류 0. CacheTest 2개는 내장 서버에 Java HttpClient로 실제 HTTP 요청을 보내 200→304→수정→200, 빈 304 본문, 정책·태그 유지, 복수 If-None-Match 값을 확인했다. HttpClient는 응답 캐시를 구현하지 않으므로 브라우저의 신선한 응답 재사용은 검증하지 않았다. 위 curl 명령 자체도 별도로 실행하지 않았다.
