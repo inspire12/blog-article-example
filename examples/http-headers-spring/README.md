@@ -104,3 +104,22 @@ curl -i -H 'If-None-Match: W/"실제-응답-UUID"' http://localhost:8080/cache/a
 `GET /cache/article/fresh`는 `private, max-age=60, must-revalidate` 정책을 제공한다. 브라우저에서 확인할 때 Network 탭의 Disable cache를 끄고 같은 URL을 다시 요청한다. 강제 새로고침은 일반적인 재사용과 다를 수 있다. `/cache/article`에 PUT을 보내도 별개 URL인 `/cache/article/fresh`의 기존 브라우저 캐시가 즉시 제거되는 것은 아니다.
 
 검증(2026-10-24): 전체 테스트 10개 통과, 실패·오류 0. CacheTest 2개는 내장 서버에 Java HttpClient로 실제 HTTP 요청을 보내 200→304→수정→200, 빈 304 본문, 정책·태그 유지, 복수 If-None-Match 값을 확인했다. HttpClient는 응답 캐시를 구현하지 않으므로 브라우저의 신선한 응답 재사용은 검증하지 않았다. 위 curl 명령 자체도 별도로 실행하지 않았다.
+
+## 인증 헤더 예제
+
+[AuthController](src/main/java/com/example/headers/AuthController.java) · [AuthTest](src/test/java/com/example/headers/AuthTest.java)
+
+```bash
+# 인증 정보 없음 → 401 + Bearer challenge (오류 코드 없음)
+curl -i http://localhost:8080/auth/article
+# 잘못된 토큰 → 401 + invalid_token
+curl -i -H 'Authorization: Bearer wrong-token' http://localhost:8080/auth/article
+# 유효한 읽기 토큰 → 200 + 본문
+curl -i -H 'Authorization: Bearer demo-reader' http://localhost:8080/auth/article
+# 유효하지만 읽기 권한 없음 → 403 + insufficient_scope
+curl -i -H 'Authorization: Bearer demo-no-scope' http://localhost:8080/auth/article
+```
+
+공개된 고정 문자열로 분기하는 로컬 헤더 학습용 예제다. 실제 사용자 인증, 토큰 발급·서명 검증·만료, 완전한 Bearer 문법 검증은 구현하지 않는다. 운영용 인증 구현으로 사용하지 않는다. 실제 서비스에서는 HTTPS와 Spring Security 등 인증 계층을 구성한다. 이번 응답은 모두 no-store로 설정했다. 인증 응답이 항상 캐시 불가라는 뜻은 아니다.
+
+2026-10-24: 전체 14개 테스트 통과(실패·오류 0). AuthTest 4개는 실제 HTTP 서버에서 토큰 없음·잘못된 토큰·권한 부족·성공과 응답 헤더·본문을 확인한다. 인증 스킴의 대소문자 차이도 확인했다. curl 명령 자체와 브라우저 로그인 흐름은 별도로 실행하지 않았다.

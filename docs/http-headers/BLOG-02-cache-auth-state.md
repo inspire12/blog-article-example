@@ -123,4 +123,98 @@ Vary: Accept-Encoding
 
 응답을 저장할 수 있는지 판단할 때는 내용이 누구에게 속하는지도 중요합니다. 로그인한 사용자마다 다른 데이터라면 다른 사람에게 같은 응답을 돌려줘서는 안 됩니다. 다음 절에서는 서버가 요청한 사용자를 어떻게 확인하는지, Authorization과 WWW-Authenticate부터 살펴보겠습니다.
 
-<!-- 편집 상태: 캐시 절 초안. 인증·상태 유지 절은 후속 작성. 실제 테스트 결과는 예제 README에 기록. -->
+### 인증 정보를 보냈는데 왜 거절될까?
+
+앞에서는 저장된 응답을 다시 사용해도 되는지 살펴봤습니다. 이번에는 그 응답을 요청한 클라이언트에게 보여줘도 되는지 확인해보겠습니다.
+
+공개된 글은 누구나 읽을 수 있지만, 작성 중인 글이나 내 정보는 접근을 제한해야 합니다. 서버는 요청에 담긴 인증 정보를 검증하고, 해당 작업을 허용할지도 판단해야 합니다.
+
+이때 함께 볼 헤더가 `Authorization`과 `WWW-Authenticate`입니다.
+
+| 헤더 | 방향 | 역할 |
+| --- | --- | --- |
+| `Authorization` | 요청 | 클라이언트가 인증 정보를 전달 |
+| `WWW-Authenticate` | 응답 | 서버가 요구하는 인증 방식과 필요한 정보 안내 |
+
+먼저 인증 정보 없이 보호된 글을 요청했다고 해보겠습니다.
+
+```http
+GET /auth/article HTTP/1.1
+Host: localhost:8080
+```
+
+서버는 다음처럼 응답할 수 있습니다.
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="articles"
+Cache-Control: no-store
+```
+
+401로 인증이 필요하다는 사실을 알리고, `WWW-Authenticate`로 어떤 방식을 요구하는지 안내합니다. 여기서는 Bearer 토큰을 요구합니다. `realm`은 보호 영역을 구분하는 이름이며 로그인 URL은 아닙니다. [MDN HTTP 인증](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication)
+
+### Authorization에 토큰을 넣으면 끝일까?
+
+클라이언트가 사용할 수 있는 토큰을 가지고 있다면 요청에 담아 보냅니다.
+
+```http
+GET /auth/article HTTP/1.1
+Host: localhost:8080
+Authorization: Bearer demo-reader
+```
+
+서버가 토큰을 유효한 것으로 확인하고 읽기 권한도 허용하면 본문을 반환합니다.
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{"title":"인증된 요청으로 읽는 글"}
+```
+
+헤더에 토큰이 있다는 사실만으로 접근을 허용하는 것은 아닙니다. 서버에서 유효성과 권한을 확인해야 합니다. 실제 서비스에서는 토큰 방식에 따라 서명·만료·발급 대상 등을 검증하거나 인증 서버에 조회합니다.
+
+`WWW-Authenticate`가 토큰을 발급해 주는 것도 아닙니다. 로그인이나 토큰 발급은 별도 과정입니다. 이미 토큰이 있다면 첫 요청부터 Authorization에 넣을 수 있으므로 반드시 401을 먼저 받아야 하는 것은 아닙니다.
+
+Bearer는 토큰을 전달하는 인증 방식이지 JWT라는 뜻은 아닙니다. 토큰 형식은 별개이며, 가진 사람이 사용할 수 있으므로 실제 서비스에서는 HTTPS로 보호해야 합니다. 아래 고정 토큰은 로컬 학습용입니다. [RFC 6750](https://datatracker.ietf.org/doc/html/rfc6750)
+
+![인증 요청과 응답 흐름](../../output/diagrams/http-authentication.png)
+
+#### 실제 인증 헤더 다뤄보기
+
+예제에서는 인증 정보가 없을 때 다음 응답을 반환하도록 했습니다.
+
+```java
+return ResponseEntity.status(401)
+        .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"articles\"")
+        .cacheControl(CacheControl.noStore()).build();
+```
+
+[Spring 예제](https://github.com/inspire12/blog-article-example/blob/main/examples/http-headers-spring/src/main/java/com/example/headers/AuthController.java)는 공개된 고정 토큰으로 네 가지 응답을 비교합니다. 토큰이 없거나 잘못되면 401, `demo-reader`면 200, 유효하지만 읽기 권한이 없는 것으로 정한 `demo-no-scope`면 403입니다.
+
+이번 코드는 헤더 흐름을 보기 위한 Spring MVC 예제입니다. 토큰 발급·만료·실제 사용자 검증은 구현하지 않았습니다. 운영용 인증은 컨트롤러마다 이런 비교를 넣기보다 Spring Security 같은 인증 계층에서 처리하도록 구성해야 합니다. 전체 코드와 실행 명령은 GitHub에 두었습니다.
+
+### 401과 403은 무엇이 다를까?
+
+토큰을 보냈는데도 거절됐다면 인증 정보 자체가 유효하지 않은지, 필요한 권한이 없는지를 나눠 확인해야 합니다.
+
+잘못되었거나 만료된 Bearer 토큰이라면 다음과 같은 응답을 받을 수 있습니다.
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="articles", error="invalid_token"
+```
+
+반면 토큰은 유효하지만 이 작업에 필요한 권한이 부족하다면 403으로 응답할 수 있습니다.
+
+```http
+HTTP/1.1 403 Forbidden
+WWW-Authenticate: Bearer realm="articles", error="insufficient_scope", scope="articles:read"
+```
+
+이 예제에서 401은 유효한 인증 정보가 필요한 경우, 403은 인증 정보를 확인했지만 읽기 권한이 부족한 경우입니다. 같은 토큰으로 요청만 반복해서는 권한 문제가 해결되지 않습니다. 모든 403이 토큰 권한 문제라는 뜻은 아니지만, Bearer 인증을 확인할 때는 상태 코드와 이 헤더를 함께 보면 거절 이유를 좁힐 수 있습니다. [RFC 6750 오류 응답](https://datatracker.ietf.org/doc/html/rfc6750#section-3.1)
+
+여기까지는 클라이언트가 Authorization에 인증 정보를 담아 보내는 흐름이었습니다. 브라우저에서는 쿠키를 이용해 로그인 상태를 이어가기도 합니다. 다음으로는 서버가 보낸 `Set-Cookie`가 이후 요청의 `Cookie`로 어떻게 연결되는지 살펴보겠습니다.
+
+<!-- 편집 상태: 캐시·인증 절 작성. 상태 유지 절 후속 작성. -->
