@@ -104,33 +104,35 @@ Spring에서는 컨트롤러의 매핑 어노테이션에서 `consumes`로 받�
 
 참고: [MDN Accept](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) · [MDN Content-Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type) · [Spring 요청 매핑](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html)
 
-### 압축하면 Content-Type도 바뀔까?
+### 같은 응답을 더 적은 데이터로 보낼 수 있을까?
 
-앞에서는 Content-Type으로 본문의 형식을 알려준다고 했습니다. 그렇다면 JSON을 gzip으로 압축해서 보내면 Content-Type도 바뀌어야 할까요?
+글 목록 API가 제목과 본문 수십 개를 반환한다고 해보겠습니다. 요청은 짧지만 응답은 꽤 커질 수 있습니다. 데이터가 커질수록 내려받아야 할 양도 늘어납니다.
 
-두 헤더를 같이 보면 구분하기 쉽습니다.
+이때 본문을 압축해서 보내면 전송량을 줄일 수 있습니다. 서버가 압축한 데이터를 보내고, 클라이언트가 풀어서 원래 내용을 사용하는 방식입니다. 여기서는 응답 본문에 gzip을 적용하는 과정을 살펴보겠습니다.
+
+### 클라이언트와 서버가 같은 압축 방식을 지원해야 한다
+
+서버가 압축해 보내더라도 클라이언트가 풀 수 없다면 사용할 수 없습니다. 그래서 클라이언트는 요청에 처리할 수 있는 방식을 적습니다.
 
 ```http
-Content-Type: application/json
+Accept-Encoding: gzip, br
+```
+
+이 요청은 gzip과 Brotli로 압축한 응답을 처리할 수 있다는 뜻입니다. 둘을 차례대로 적용하라는 뜻은 아닙니다. 서버가 지원하는 방식과 설정을 보고 사용할 방식을 선택합니다. 요청에 `br`가 있다고 서버에 Brotli 기능이 생기는 것은 아닙니다.
+
+서버가 gzip을 적용했다면 응답에는 다음 헤더가 붙습니다.
+
+```http
 Content-Encoding: gzip
 ```
 
-본문을 gzip으로 압축했지만, 압축을 풀면 나오는 내용은 여전히 JSON입니다. Content-Type은 그 데이터의 형식을, Content-Encoding은 적용한 인코딩을 설명합니다.
+`Accept-Encoding`은 받을 수 있는 방식이고, `Content-Encoding`은 실제로 적용한 방식입니다. 클라이언트가 gzip을 지원해도 서버는 조건에 따라 압축하지 않을 수 있습니다. [MDN Accept-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding)
 
-클라이언트는 요청할 때 자신이 처리할 수 있는 방식을 알려줍니다.
-
-```http
-Accept-Encoding: gzip
-```
-
-서버는 이 조건과 자신의 설정을 보고 압축 여부를 결정합니다. 클라이언트가 gzip을 지원하더라도 응답 크기나 타입, 서버 설정에 따라 압축하지 않을 수 있습니다. 헤더에 gzip이라고 적는 것만으로 압축되는 것도 아닙니다. 실제 본문에 압축 처리가 적용되어야 합니다.
-
-예제에서는 텍스트 응답을 사용했습니다. 요청과 응답을 연결해서 보면 다음과 같습니다. 일부 헤더를 생략한 설명용 메시지입니다.
+예제의 요청과 응답을 연결하면 다음과 같습니다. 일부 헤더는 생략했습니다.
 
 ```http
 GET /compression/article HTTP/1.1
 Host: localhost:8080
-Accept: text/plain
 Accept-Encoding: gzip
 ```
 
@@ -143,27 +145,53 @@ Vary: Accept-Encoding
 [gzip으로 압축된 본문 바이트]
 ```
 
-받는 쪽에서는 gzip을 복원한 다음 UTF-8 텍스트로 읽습니다. `Vary: Accept-Encoding`은 캐시가 응답을 선택할 때 요청의 압축 조건도 고려하도록 알리는 헤더입니다. 이 부분은 다음 편의 캐시 설명에서 이어가겠습니다.
+클라이언트는 gzip을 풀고 나서 본문을 읽습니다. 압축을 풀면 텍스트이므로 Content-Type은 여전히 `text/plain`입니다.
+
+여기서 `Content-Encoding`은 압축을 실행하는 명령이 아닙니다. 실제 본문은 그대로 두고 이 헤더만 붙이면 클라이언트는 일반 텍스트를 gzip으로 풀려고 하다가 오류를 만날 수 있습니다. [MDN Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding)
 
 ![응답 압축과 복원](../../output/diagrams/http-compression.png)
 
 #### 실제 압축 다뤄보기
 
-Spring Boot 예제에서는 내장 서버가 응답을 압축하도록 설정했습니다. Controller는 평소처럼 문자열을 반환하고, 내장 Tomcat이 실제 압축과 헤더 처리를 맡습니다.
+Spring Boot에서는 내장 웹 서버의 응답 압축 기능을 켤 수 있습니다. 이번 예제는 내장 Tomcat을 사용하고, 다음처럼 설정했습니다.
 
 ```properties
 server.compression.enabled=true
+server.compression.mime-types=application/json,text/plain
+server.compression.min-response-size=1KB
 ```
 
-응답 압축을 켜는 핵심 설정입니다. 예제에서는 대상 타입을 JSON·텍스트로, 최소 응답 크기를 1KB로 추가 지정했습니다. 전체 설정은 GitHub 예제에 남겼습니다. 별도로 gzip 처리 코드를 Controller에 넣을 필요는 없습니다. [Spring Boot 응답 압축 안내](https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.enable-response-compression)
+압축을 활성화하고 대상 타입과 최소 응답 크기를 지정한 것입니다. Controller는 평소처럼 문자열을 반환합니다. Tomcat이 요청의 Accept-Encoding과 응답 조건을 확인하고, 압축할 수 있으면 실제 본문을 압축하고 Content-Encoding도 붙입니다.
 
-예제의 반복 문장으로 만든 응답은 13,800바이트에서 167바이트로 줄었습니다. 같은 문장을 반복한 데이터라 압축이 잘되는 조건이긴 합니다. 이 수치 자체보다는 gzip으로 받은 본문을 다시 풀었을 때 원문과 같다는 점을 확인하는 데 의미가 있습니다. 본문 크기만 비교한 것이므로 응답 속도가 그 비율만큼 빨라졌다는 뜻도 아닙니다.
+따라서 Controller에 gzip 코드를 넣거나 Content-Encoding을 직접 설정하지 않았습니다. 대상 타입과 크기를 설정해 두면 모든 응답을 무조건 압축하는 것도 피할 수 있습니다. 응답 길이를 미리 알 수 있는지 등 세부 조건은 내장 서버 구현의 영향을 받습니다. [Spring Boot 응답 압축 안내](https://docs.spring.io/spring-boot/how-to/webserver.html#howto.webserver.enable-response-compression)
 
-직접 확인할 때 주의할 점도 있습니다. `curl --compressed`는 응답을 자동으로 풀어줍니다. 브라우저도 보통 압축을 해제한 내용을 보여주므로, 결과가 읽을 수 있는 텍스트라고 해서 압축되지 않은 것은 아닙니다.
+### 압축은 항상 이득일까?
 
-[GitHub 예제](https://github.com/inspire12/blog-article-example/tree/main/examples/http-headers-spring)에는 압축된 바이트를 받아 원문과 비교하는 테스트와 수동 확인 방법을 정리했습니다.
+반복되는 필드 이름과 문자열이 많은 JSON이나 HTML은 압축 효과를 기대할 수 있습니다. 반면 JPEG나 ZIP처럼 이미 압축된 데이터는 다시 압축해도 크기가 별로 줄지 않거나 오히려 커질 수 있습니다. [MDN Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding)
 
-참고: [MDN Accept-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Encoding) · [MDN Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding)
+작은 응답도 압축으로 아끼는 양이 적을 수 있습니다. 서버에서 압축하고 클라이언트에서 복원하는 데에는 처리 비용이 들기 때문에, 압축률만으로 효과를 판단하기는 어렵습니다. 전송량이 줄었는지와 함께 서버 CPU 사용량과 실제 응답 시간도 봐야 합니다.
+
+예제에서는 같은 문장을 200번 반복했습니다. 압축 전 본문은 13,800바이트였고 gzip으로 받은 본문은 167바이트였습니다. 반복이 많은 데이터라 잘 압축되는 조건입니다. 일반적인 API에서도 이 정도로 줄어든다는 뜻은 아닙니다.
+
+이 측정은 본문 크기만 비교한 것입니다. DB 조회나 JSON 생성 시간을 측정하지 않았고, 응답 시간이 같은 비율로 줄었다고 볼 수도 없습니다.
+
+### 압축했는데 Network 탭에는 왜 글자가 그대로 보일까?
+
+브라우저는 보통 응답을 자동으로 풀어서 보여줍니다. Response 탭에 읽을 수 있는 텍스트가 나온다고 압축하지 않은 것은 아닙니다. 응답 헤더의 `Content-Encoding`을 먼저 확인하고, 전송 크기와 압축을 푼 뒤의 크기도 구분해서 봐야 합니다.
+
+curl에서도 비슷합니다.
+
+```bash
+curl --compressed http://localhost:8080/compression/article
+```
+
+이 명령은 curl이 지원하는 압축을 요청하고 받은 본문을 자동으로 풉니다. 따라서 출력된 텍스트를 저장한 뒤 그 파일 크기를 재면 압축된 전송 크기가 아닙니다.
+
+실제 압축 여부를 확인하려면 자동 복원 없이 gzip 바이트를 저장하고, 압축을 푼 내용이 원문과 같은지 비교하면 됩니다. 예제 테스트에서도 압축하지 않은 응답과 gzip 응답을 각각 받은 뒤 복원한 바이트가 같은지 확인했습니다. 자세한 명령과 테스트는 [GitHub 예제](https://github.com/inspire12/blog-article-example/tree/main/examples/http-headers-spring)에 정리했습니다.
+
+압축되지 않았다면 요청의 Accept-Encoding, 서버의 압축 활성화 여부, 대상 타입과 크기 조건부터 확인하면 됩니다.
+
+마지막으로 응답의 `Vary: Accept-Encoding`은 캐시가 압축 조건에 맞는 응답을 선택하도록 알립니다. 같은 URL에서도 압축된 응답과 압축되지 않은 응답이 나올 수 있기 때문입니다. 이 부분은 다음 편에서 캐시와 함께 살펴보겠습니다.
 
 ### 마무리
 
@@ -173,7 +201,7 @@ server.compression.enabled=true
 
 정리하다 보니 한 글에 담기에는 내용이 많아, 이번 글을 포함해 세 편으로 나누어 이어가려고 합니다.
 
-- **1편 — HTTP 헤더의 필요성, 표현 선택·해석, 압축:** 무엇을 보내고 어떤 형식으로 받을지 살펴봅니다.
+- **1편 — HTTP 헤더의 필요성, 표현 선택·해석, 압축:** 주고받을 형식을 선택하고, 응답을 압축해 전송량을 줄이는 과정을 살펴봅니다.
 - **2편 — 캐시·재검증, 인증, 상태 유지:** 받은 응답을 다시 사용하는 방법과 사용자를 확인하고 요청 사이의 상태를 이어가는 과정을 다룹니다.
 - **3편 — 다른 출처의 응답 읽기, 브라우저 보안 정책, 이동·다운로드·부분 조회:** 브라우저에서만 요청이 실패하거나, 파일을 다운로드하고 이어받는 상황처럼 실제 사례를 중심으로 살펴봅니다.
 
